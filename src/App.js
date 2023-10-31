@@ -25,7 +25,7 @@ function App() {
       <h1>Todo List APP</h1>
       <div>
         <input type="text" value={inputValue} onChange={handleInputChange} />
-        <button onClick={addTodo}>Add Todo List</button>
+        <button onClick={addTodo}>Add Task</button>
       </div>
       <ul>
         {todos.map((todo, index) => (
