@@ -22,7 +22,7 @@ function App() {
 
   return (
     <div>
-      <h1>Todo List App</h1>
+      <h1>Todo List APP</h1>
       <div>
         <input type="text" value={inputValue} onChange={handleInputChange} />
         <button onClick={addTodo}>Add Todo List</button>
