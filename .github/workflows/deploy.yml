@@ -1,4 +1,4 @@
-name: Deploy to S3
+name: Docker Example
 
 on:
   push:
@@ -6,29 +6,17 @@ on:
       - master
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+      - name: Set up Docker
+        uses: docker/setup-docker@v2
 
-      - name: Install Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Build React App
-        run: npm run build
-
-      - name: Configure AWS CLI
+      - name: Configure AWS Credentials
         run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} && aws configure set default.region us-east-1
 
-      - name: Upload build files to S3
-        run: aws s3 sync build/ s3://worthai-dev-frontendwinjit --delete
-
-      - name: Cache Invalidation
-        run: aws cloudfront create-invalidation --distribution-id ${{secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID}} --paths "/*"
+      - name: Login to Amazon ECR
+        id: login-ecr
+        run: |
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/c6f7m2h8
