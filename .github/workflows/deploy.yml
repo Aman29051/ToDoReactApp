@@ -20,3 +20,9 @@ jobs:
         id: login-ecr
         run: |
           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/c6f7m2h8
+      
+      - name: Install and Configure Argo CD CLI
+        run: |
+          mkdir -p ~/.local/bin
+          curl -sSL -o ~/.local/bin/argocd https://github.com/argoproj/argo-cd/releases/download/v2.1.2/argocd-linux-amd64
+          chmod +x ~/.local/bin/argocd
