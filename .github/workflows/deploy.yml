@@ -1,37 +1,42 @@
-name: Docker Example
-
+name: Dev:Build, Push & Create deploy PR
+ 
 on:
-  push:
-    branches:
-      - master
-
+  workflow_dispatch:
+    inputs:
+      refToBuild:
+        description: "Branch, tag or commit SHA1 to build"
+        required: true
+        type: string
+ 
 jobs:
   build:
+    name: Build and Push
     runs-on: ubuntu-latest
+    environment: development
 
+    outputs:
+      IMAGE_TAG: ${{ steps.capture-image-tag.outputs.IMAGE_TAG }}
+    
     steps:
-      # - name: Set up Docker
-      #   uses: docker/setup-docker@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ inputs.refToBuild }}
 
-      - name: Configure AWS Credentials
-        run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} && aws configure set default.region us-east-1
+      # Get Git vals for image tag format
+      - name: Get Git Branch
+        run: echo "BRANCH=`git rev-parse --abbrev-ref HEAD | sed -r 's/HEAD/pr/g'`" >> $GITHUB_ENV
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        run: |
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/c6f7m2h8
-      
-      - name: Install and Configure Argo CD CLI
-        run: |
-          mkdir -p ~/.local/bin
-          curl -sSL -o ~/.local/bin/argocd https://github.com/argoproj/argo-cd/releases/download/v2.1.2/argocd-linux-amd64
-          chmod +x ~/.local/bin/argocd
+      - name: Get Git Commit SHA (short)
+        run: echo "SHA_SHORT=`git rev-parse --short HEAD`" >> $GITHUB_ENV
 
-      - name: Sync Application
+      - name: Check Branch and Commit
+        run: echo running on branch ${{ env.BRANCH }} with commit ${{ env.SHA_SHORT }}
+ 
+      - name: Capture Image Tag
+        id: capture-image-tag
         run: |
-          argocd login $ARGOCD_SERVER --username $ARGOCD_USERNAME --password $ARGOCD_PASSWORD
-          # argocd app sync my-app -p default
-        env:
-          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
-          ARGOCD_USERNAME: ${{ secrets.ARGOCD_USERNAME }}
-          ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
+          TAG=${{ env.BRANCH }}_${{ env.SHA_SHORT }}
+          echo "The image tag is $TAG"
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+          echo "::set-output name=IMAGE_TAG::$TAG"
