@@ -51,7 +51,7 @@ jobs:
     - name: Delete old tags and branches
       run: |
         tags_array=(${{ steps.get_tags.outputs.tags }})
-        keep_count=5
+        keep_count=0
         if [ ${#tags_array[@]} -gt $keep_count ]; then
           for tag in "${tags_array[@]:$keep_count}"; do
             echo "Deleting tag: $tag"
