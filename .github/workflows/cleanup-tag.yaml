@@ -9,18 +9,18 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.MY_GITHUB_TOKEN }}
 
-    - name: Set up Git
-      run: |
-        git config --global user.name 'github-actions'
-        git config --global user.email 'github-actions@github.com'
+    # - name: Set up Git
+    #   run: |
+    #     git config --global user.name 'github-actions'
+    #     git config --global user.email 'github-actions@github.com'
 
     - name: Get all tags
       id: get_tags
@@ -32,7 +32,7 @@ jobs:
     - name: Delete old tags and branches
       run: |
         tags_array=(${{ steps.get_tags.outputs.tags }})
-        keep_count=5
+        keep_count=0
         if [ ${#tags_array[@]} -gt $keep_count ]; then
           for tag in "${tags_array[@]:$keep_count}"; do
             echo "Deleting tag: $tag"
