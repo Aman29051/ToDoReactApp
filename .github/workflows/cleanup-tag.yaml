@@ -27,7 +27,7 @@ jobs:
 
     - name: Delete old tags and branches
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
       run: |
         tags_array=(${{ steps.get_tags.outputs.tags }})
         keep_count=0
