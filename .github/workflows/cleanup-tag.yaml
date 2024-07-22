@@ -57,9 +57,15 @@ jobs:
             echo "Deleting tag: $tag"
             git push --delete origin $tag
 
-            echo "Branches containing the tag $tag:"
+            echo "Release branches containing the tag $tag:"
             commit=$(git rev-list -n 1 $tag)
-            git branch -r --contains $commit
+            release_branches=$(git branch -r --contains $commit | grep 'origin/Release ' | sed 's|origin/||')
+
+            if [ -n "$release_branches" ]; then
+              echo "$release_branches"
+            else
+              echo "No release branches found containing the tag $tag"
+            fi
             
             branch="Release ${tag}"
             if git show-ref --verify --quiet refs/heads/"$branch"; then
