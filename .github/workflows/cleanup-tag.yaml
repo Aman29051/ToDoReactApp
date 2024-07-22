@@ -1,0 +1,48 @@
+name: Cleanup Old Tags and Release Branches
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Runs weekly on Sunday at midnight
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Git
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+
+    - name: Get all tags
+      id: get_tags
+      run: |
+        git fetch --tags
+        tags=$(git tag --sort=-creatordate)
+        echo "::set-output name=tags::$tags"
+
+    - name: Delete old tags and branches
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        tags_array=(${{ steps.get_tags.outputs.tags }})
+        keep_count=0
+        if [ ${#tags_array[@]} -gt $keep_count ]; then
+          for tag in "${tags_array[@]:$keep_count}"; do
+            echo "Deleting tag: $tag"
+            git push --delete origin $tag
+
+            branch="release-$tag"
+            if git show-ref --verify --quiet refs/heads/$branch; then
+              echo "Deleting branch: $branch"
+              git push --delete origin $branch
+            fi
+          done
+        else
+          echo "No tags to delete"
+        fi
+        
