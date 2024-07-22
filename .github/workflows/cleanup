@@ -1,0 +1,41 @@
+name: Cleanup Old Tags and Release Branches
+
+on:
+  schedule:
+    - cron: 0 0 * * 1 (runs every Monday at 12:00 AM)
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.event.ref }}
+
+      - name: Fetch all tags
+        run: git fetch --all --tags
+
+      - name: Sort tags by creation date
+        run: git tag --sort=-creatordate
+
+      - name: Delete old tags and release branches
+        run: |
+          tags=$(git tag --sort=-creatordate | tail -n +6)
+          for tag in $tags; do
+            git tag -d $tag
+            git push origin :refs/tags/$tag
+            git branch -d $tag
+            git push origin :refs/heads/$tag
+          done
+
+      - name: Commit and push changes
+        run: |
+          git add.
+          git commit -m "Cleanup old tags and release branches"
+          git push origin master
