@@ -27,24 +27,21 @@ jobs:
     - name: Delete old tags and branches
       run: |
         tags_array=(${{ steps.get_tags.outputs.tags }})
-        keep_count=0
+        keep_count=5
         if [ ${#tags_array[@]} -gt $keep_count ]; then
           for tag in "${tags_array[@]:$keep_count}"; do
             echo "Deleting tag: $tag"
             git push --delete origin $tag
 
+            echo "Fetching all branches..."
+            git fetch --all
+            echo "Listing all branches:"
+            git branch -r
+
             branch="release/${tag}"
-            # if git rev-parse --quiet --verify "${branch}"; then
-            #   git branch -D "${branch}"
-            #   echo "Deleted branch ${branch}"
-            # else
-            #   echo "Branch ${branch} does not exist"
-            # fi
-            
-            # branch="Release ${tag}"
-            if git show-ref --verify --quiet refs/heads/"$branch"; then
+            if git show-ref --verify --quiet refs/heads/$branch; then
               echo "Deleting branch: $branch"
-              git push --delete origin "$branch"
+              git push origin --delete "$branch"
             fi
           done
         else
