@@ -34,18 +34,18 @@ jobs:
             git push --delete origin $tag
 
             branch="release/${tag}"
-            if git rev-parse --quiet --verify "${branch}"; then
-              git branch -D "${branch}"
-              echo "Deleted branch ${branch}"
-            else
-              echo "Branch ${branch} does not exist"
-            fi
+            # if git rev-parse --quiet --verify "${branch}"; then
+            #   git branch -D "${branch}"
+            #   echo "Deleted branch ${branch}"
+            # else
+            #   echo "Branch ${branch} does not exist"
+            # fi
             
             # branch="Release ${tag}"
-            # if git show-ref --verify --quiet refs/heads/"$branch"; then
-            #   echo "Deleting branch: $branch"
-            #   git push --delete origin "$branch"
-            # fi
+            if git show-ref --verify --quiet refs/heads/"$branch"; then
+              echo "Deleting branch: $branch"
+              git push --delete origin "$branch"
+            fi
           done
         else
           echo "No tags to delete"
