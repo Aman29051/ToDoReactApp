@@ -33,12 +33,12 @@ jobs:
             echo "Deleting tag: $tag"
             git push --delete origin $tag
 
-            echo "Fetching all branches..."
-            git fetch --all
-            echo "Listing all branches:"
-            git branch -r
+            # echo "Fetching all branches..."
+            # git fetch --all
+            # echo "Listing all branches:"
+            # git branch -r
 
-            branch="release/${tag}"
+            branch="origin/release/${tag}"
             if git show-ref --verify --quiet refs/heads/$branch; then
               echo "Deleting branch: $branch"
               git push origin --delete "$branch"
