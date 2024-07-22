@@ -57,10 +57,14 @@ jobs:
             echo "Deleting tag: $tag"
             git push --delete origin $tag
 
-            branch="Release $tag"
-            if git show-ref --verify --quiet refs/heads/$branch; then
+            echo "Branches containing the tag $tag:"
+            commit=$(git rev-list -n 1 $tag)
+            git branch -r --contains $commit
+            
+            branch="Release ${tag}"
+            if git show-ref --verify --quiet refs/heads/"$branch"; then
               echo "Deleting branch: $branch"
-              git push --delete origin $branch
+              git push --delete origin "$branch"
             fi
           done
         else
