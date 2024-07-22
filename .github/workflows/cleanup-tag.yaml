@@ -13,11 +13,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    # - name: Set up Git
-    #   run: |
-    #     git config --global user.name 'github-actions'
-    #     git config --global user.email 'github-actions@github.com'
-
     - name: Get all tags
       id: get_tags
       run: |
@@ -29,8 +24,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
       run: |
+        git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
         tags_array=(${{ steps.get_tags.outputs.tags }})
-        keep_count=0
+        keep_count=5
         if [ ${#tags_array[@]} -gt $keep_count ]; then
           for tag in "${tags_array[@]:$keep_count}"; do
             echo "Deleting tag: $tag"
@@ -45,4 +41,3 @@ jobs:
         else
           echo "No tags to delete"
         fi
-        
