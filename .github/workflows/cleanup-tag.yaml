@@ -33,7 +33,7 @@ jobs:
             echo "Deleting tag: $tag"
             git push --delete origin $tag
 
-            branch="Release ${tag}"
+            branch="release/${tag}"
             if git rev-parse --quiet --verify "${branch}"; then
               git branch -D "${branch}"
               echo "Deleted branch ${branch}"
