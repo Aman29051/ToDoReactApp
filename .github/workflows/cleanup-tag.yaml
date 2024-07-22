@@ -9,33 +9,41 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          repository: ${{ github.repository }}
-          ref: ${{ github.event.ref }}
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Fetch all tags
-        run: git fetch --all --tags
+    - name: Set up Git
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
 
-      - name: Sort tags by creation date
-        run: git tag --sort=-creatordate
+    - name: Get all tags
+      id: get_tags
+      run: |
+        git fetch --tags
+        tags=$(git tag --sort=-creatordate)
+        echo "::set-output name=tags::$tags"
 
-      - name: Delete old tags and release branches
-        run: |
-          tags=$(git tag --sort=-creatordate | tail -n +6)
-          for tag in $tags; do
-            git tag -d $tag
-            git push origin :refs/tags/$tag
-            git branch -d $tag
-            git push origin :refs/heads/$tag
+    - name: Delete old tags and branches
+      run: |
+        tags_array=(${{ steps.get_tags.outputs.tags }})
+        keep_count=5
+        if [ ${#tags_array[@]} -gt $keep_count ]; then
+          for tag in "${tags_array[@]:$keep_count}"; do
+            echo "Deleting tag: $tag"
+            git push --delete origin $tag
+
+            branch="release-$tag"
+            if git show-ref --verify --quiet refs/heads/$branch; then
+              echo "Deleting branch: $branch"
+              git push --delete origin $branch
+            fi
           done
-
-      - name: Commit and push changes
-        run: |
-          git add.
-          git commit -m "Cleanup old tags and release branches"
-          git push origin master
+        else
+          echo "No tags to delete"
+        fi
