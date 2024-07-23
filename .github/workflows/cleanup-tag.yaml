@@ -1,4 +1,4 @@
-name: Cleanup Old Tags and Release Branches
+name: Cleanup Old Tags and Releases
 
 on:
   schedule:
@@ -24,7 +24,7 @@ jobs:
         tags=$(git tag --sort=-creatordate)
         echo "::set-output name=tags::$tags"
 
-    - name: Delete old tags and branches
+    - name: Delete old tags and releases
       run: |
         tags_array=(${{ steps.get_tags.outputs.tags }})
         keep_count=0
@@ -33,15 +33,13 @@ jobs:
             echo "Deleting tag: $tag"
             git push --delete origin $tag
 
-            # echo "Fetching all branches..."
-            # git fetch --all
-            # echo "Listing all branches:"
-            # git branch -r
+            release_id=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+              https://api.github.com/repos/${{ github.repository }}/releases/tags/$tag | jq -r '.id')
 
-            branch="origin/release/${tag}"
-            if git show-ref --verify --quiet refs/heads/$branch; then
-              echo "Deleting branch: $branch"
-              git push origin --delete "$branch"
+            if [ "$release_id" != "null" ]; then
+              echo "Deleting release: $release_id"
+              curl -s -X DELETE -H "Authorization: token $GITHUB_TOKEN" \
+                https://api.github.com/repos/${{ github.repository }}/releases/$release_id
             fi
           done
         else
