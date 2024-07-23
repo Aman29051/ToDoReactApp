@@ -1,0 +1,40 @@
+name: Delete Branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        description: 'Branch name to delete'
+        required: true
+
+jobs:
+  delete_branch:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Check if branch exists
+      id: check_branch
+      run: |
+        branch_name=${{ github.event.inputs.branch_name }}
+        if git show-ref --verify --quiet refs/heads/$branch_name; then
+          echo "Branch $branch_name exists."
+          echo "::set-output name=branch_exists::true"
+        else
+          echo "Branch $branch_name does not exist."
+          echo "::set-output name=branch_exists::false"
+      shell: bash
+
+    - name: Delete branch
+      if: steps.check_branch.outputs.branch_exists == 'true'
+      run: |
+        branch_name=${{ github.event.inputs.branch_name }}
+        git branch -D $branch_name
+        git push origin --delete $branch_name
+      env:
+        GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+
+    - name: Branch not found message
+      if: steps.check_branch.outputs.branch_exists == 'false'
+      run: echo "No branch found with the name ${{ github.event.inputs.branch_name }}"
