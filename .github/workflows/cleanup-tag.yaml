@@ -30,7 +30,7 @@ jobs:
       run: |
         git fetch --tags
         tags=$(git for-each-ref --sort=-creatordate --format '%(refname:short)' refs/tags)
-        echo "tags=${tags}" >> $GITHUB_OUTPUT
+        echo "::set-output name=tags::${tags//$'\n'/,}"
     
     - name: Sort tags
       run: |
