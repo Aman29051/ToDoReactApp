@@ -36,10 +36,7 @@ jobs:
           for tag in "${tags_array[@]:$keep_count}"; do
             branch="release/$tag"
             echo "Branch:$branch"
-            # echo "Deleting branch: $branch"
-            # git push --delete origin $branch
-            # if git show-ref --quiet refs/heads/$branch; then
-            if git ls-remote --heads origin refs/heads/$branch | wc -l; then
+            if git ls-remote --heads origin refs/heads/$branch | grep -q $branch; then
               echo "Deleting branch: $branch"
               git push --delete origin $branch
             else
