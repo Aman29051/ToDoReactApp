@@ -17,29 +17,26 @@ jobs:
       with:
         token: ${{ secrets.MY_GITHUB_TOKEN }}
 
-    - name: Get all tags
-      id: get_tags
-      run: |
-        # git fetch --tags
-        # tags=$(git tag --sort=-creatordate)
-        # echo "::set-output name=tags::${tags//$'\n'/,}"
-        # echo "tags=$(echo \"$tags\" | jq -R '. | @uri')" >> $GITHUB_OUTPUT
-        git fetch --tags
-        tags=$(git for-each-ref --sort=-creatordate --format '%(refname:short)' refs/tags)
-        echo "tags=$(echo \"$tags\" | jq -R '. | @uri')" >> $GITHUB_OUTPUT
-
     # - name: Get all tags
     #   id: get_tags
     #   run: |
     #     git fetch --tags
-    #     tags=$(git for-each-ref --sort=-creatordate --format '%(refname:short)' refs/tags)
-    #     echo "tags=${tags}" >> $GITHUB_OUTPUT
+    #     tags=$(git tag --sort=-creatordate)
+    #     echo "::set-output name=tags::${tags//$'\n'/,}"
+    #     # echo "tags=$(echo \"$tags\" | jq -R '. | @uri')" >> $GITHUB_OUTPUT
+
+    - name: Get all tags
+      id: get_tags
+      run: |
+        git fetch --tags
+        tags=$(git for-each-ref --sort=-creatordate --format '%(refname:short)' refs/tags)
+        echo "tags=${tags}" >> $GITHUB_OUTPUT
     
-    # - name: Sort tags
-    #   run: |
-    #     IFS=' ' read -r -a tags_array <<< "${tags}"
-    #     tags_array=($(printf "%s\n" "${tags_array[@]}" | sort -V))
-    #     echo "sorted_tags=${tags_array[*]}" >> $GITHUB_OUTPUT
+    - name: Sort tags
+      run: |
+        IFS=' ' read -r -a tags_array <<< "${tags}"
+        tags_array=($(printf "%s\n" "${tags_array[@]}" | sort -V))
+        echo "sorted_tags=${tags_array[*]}" >> $GITHUB_OUTPUT
        
 
     - name: Delete old branches
