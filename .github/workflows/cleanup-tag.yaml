@@ -22,7 +22,8 @@ jobs:
       run: |
         git fetch --tags
         tags=$(git tag --sort=-creatordate)
-        echo echo "tags=$tags" >> $GITHUB_OUTPUT
+        # echo "tags=$tags" >> $GITHUB_OUTPUT
+        echo "::set-output name=tags::$tags"
 
     - name: Delete old branches
       run: |
