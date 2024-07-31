@@ -1,4 +1,4 @@
-name: Cleanup Old Tags and Releases
+name: Cleanup Old Branches
 
 on:
   schedule:
@@ -9,13 +9,13 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
-        token: ${{ secrets.MY_GITHUB_TOKEN }}
+        token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
     - name: Get all tags
       id: get_tags
@@ -24,24 +24,21 @@ jobs:
         tags=$(git tag --sort=-creatordate)
         echo "::set-output name=tags::$tags"
 
-    - name: Delete old tags and releases
+    - name: Delete old branches
       run: |
         tags_array=(${{ steps.get_tags.outputs.tags }})
         keep_count=0
         if [ ${#tags_array[@]} -gt $keep_count ]; then
           for tag in "${tags_array[@]:$keep_count}"; do
-            echo "Deleting tag: $tag"
-            git push --delete origin $tag
-
-            release_id=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-              https://api.github.com/repos/${{ github.repository }}/releases/tags/$tag | jq -r '.id')
-
-            if [ "$release_id" != "null" ]; then
-              echo "Deleting release: $release_id"
-              curl -s -X DELETE -H "Authorization: token $GITHUB_TOKEN" \
-                https://api.github.com/repos/${{ github.repository }}/releases/$release_id
+            branch="release/$tag"
+            echo "Branch:$branch"
+            if git show-ref --quiet refs/heads/$branch; then
+              echo "Deleting branch: $branch"
+              git push --delete origin $branch
+            else
+              echo "Branch $branch does not exist."
             fi
           done
         else
-          echo "No tags to delete"
+          echo "No branches to delete"
         fi
