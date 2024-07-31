@@ -30,6 +30,8 @@ jobs:
         IFS=',' read -r -a tags_array <<< "${{ steps.get_tags.outputs.tags }}"
         echo "${tags_array[@]}"
         keep_count=5
+        echo "Listing all branches:"
+        git branch -r
         if [ ${#tags_array[@]} -gt $keep_count ]; then
           for tag in "${tags_array[@]:$keep_count}"; do
             branch="release/$tag"
