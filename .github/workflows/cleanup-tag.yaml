@@ -28,7 +28,7 @@ jobs:
     - name: Delete old branches
       run: |
         tags_array=(${{ steps.get_tags.outputs.tags }})
-        keep_count=0
+        keep_count=5
         if [ ${#tags_array[@]} -gt $keep_count ]; then
           for tag in "${tags_array[@]:$keep_count}"; do
             branch="release/$tag"
