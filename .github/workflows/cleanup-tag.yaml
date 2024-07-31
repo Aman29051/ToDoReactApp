@@ -24,8 +24,6 @@ jobs:
         tags=$(git tag --sort=-creatordate)
         sorted_tags=$(echo "$tags" | tac | tr '\n' ',' | sed 's/,$//')
         echo "::set-output name=tags::$sorted_tags"
-        # echo "tags=$(echo \"$tags\" | jq -R '. | @uri')" >> $GITHUB_OUTPUT
-       
 
     - name: Delete old branches
       run: |
