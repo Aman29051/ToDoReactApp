@@ -36,12 +36,14 @@ jobs:
           for tag in "${tags_array[@]:$keep_count}"; do
             branch="release/$tag"
             echo "Branch:$branch"
-            if git show-ref --quiet refs/heads/$branch; then
-              echo "Deleting branch: $branch"
-              git push --delete origin $branch
-            else
-              echo "Branch $branch does not exist."
-            fi
+            echo "Deleting branch: $branch"
+            git push --delete origin $branch
+            # if git show-ref --quiet refs/heads/$branch; then
+            #   echo "Deleting branch: $branch"
+            #   git push --delete origin $branch
+            # else
+            #   echo "Branch $branch does not exist."
+            # fi
           done
         else
           echo "No branches to delete"
