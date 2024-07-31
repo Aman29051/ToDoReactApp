@@ -9,13 +9,13 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
-        token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        token: ${{ secrets.MY_GITHUB_TOKEN }}
 
     - name: Get all tags
       id: get_tags
